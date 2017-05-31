@@ -164,66 +164,66 @@
 <script>hljs.initHighlightingOnLoad();</script> 
 
 <p>最近读了《JavaScript设计模式》<em>张容铭版</em>，对JavaScript设计模式有了一定程度的了解。<br>在平时的工作中，我们经常会遇到一个多选框的需求，这样的需求会衍生出全选框的需求。由于项目中没有用到第三方框架所以就需要自己实现了。<br>按照普通的做法，我们都会先写一个CheckBox类，然后生成n个多选框，然后指定其中一个为全选框。在每个cbox的回调函数中写他们之间的逻辑处理。这样的做法，虽说灵活，每个cbox都是相对独立的，只有在回调函数中写他们之间的逻辑关系。但是这样也会带来一个问题。如果我们这个逻辑向外拓展，要指定出一个全选框控制其他的全选框，这样的一层接着一层的嵌套会使得逻辑变得十分复杂且难以看懂。（类似购物车，一个购物车中可能有多个店铺，一个店铺下可能有多个商品，购物车的全选框控制着店铺的全选框，店铺的全选框控制其下所有的多选框。）<br>由此，我衍生出将<code>CheckBox</code>类拓展的想法，在<code>new CheckBox()</code>的时候就传入其有可能存在的<code>parent</code>，像下面的写法一样。</p>
-<pre><code class="javascript">    var pCbox = new CheckBox({
-      clickCallback: function(data){
-      },
-      data: {text: &#39;父多选框&#39;, val: &#39;&#39;},
-      contatiner: $(&#39;#p-cbox&#39;)
-    }).create();
-    var cCbox = new CheckBox({
-      clickCallback: function(data){ 
-      },
-      data: {text: &#39;子多选框&#39;, val: &#39;&#39;},
-      container: $(&#39;#c-cbox&#39;),
-      parent: pCbox
-    }).create();
+<pre><code class="javascript">var pCbox = new CheckBox({
+  clickCallback: function(data){
+  },
+  data: {text: &#39;父多选框&#39;, val: &#39;&#39;},
+  contatiner: $(&#39;#p-cbox&#39;)
+}).create();
+var cCbox = new CheckBox({
+  clickCallback: function(data){ 
+  },
+  data: {text: &#39;子多选框&#39;, val: &#39;&#39;},
+  container: $(&#39;#c-cbox&#39;),
+  parent: pCbox
+}).create();
 </code></pre>
 <p>以上，是我写本篇文章的起源。</p>
 <h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>在起初的构想，每个cbox应该是要相对独立的。过多耦合的代码。以免影响代码的质量。所以就联想到了之前看到的一个设计模式—观察者模式。<br>所谓观察者模式，它可以描述成一个发布中心，你可以在发布中心订阅（<code>regist</code>）消息，你也可以发布（<code>fire</code>）消息，当然还可以取消（<code>remove</code>）订阅。<br>以下是一个简单的观察者对象的实现。</p>
-<pre><code class="javascript">    // 观察者对象
-    var Observer = (function(){
+<pre><code class="javascript">// 观察者对象
+var Observer = (function(){
 
-      var __message = {};
+  var __message = {};
 
-      return {
-        // 注册信息
-        regist: function(type, fn){
-          if(typeof __message[type] === &#39;undefined&#39;) {
-            __message[type] = [fn];
-          } else {
-            __message[type].push(fn);
-          }
-          return this;
-        },
-        // 发布信息
-        fire: function(type, args){
-          if(!__message[type]) {
-            return this;
-          }
-          var event = {
-            type: type,
-            args: args || {}
-          },
-          i = 0,
-          len = __message[type].length;
-
-          for(; i &lt; len; i ++) {
-            __message[type][i].call(this, event);
-          }
-          return this;
-        },
-        // 移除信息
-        remove: function(type, fn){
-          if(__message[type] instanceof Array) {
-            var i = __message[type].length - 1;
-            for(; i&gt;= 0; i --) {
-              __message[type][i] === fn &amp;&amp; __message[type].splice(i, 1);
-            } 
-          }
-          return this;
-        }
+  return {
+    // 注册信息
+    regist: function(type, fn){
+      if(typeof __message[type] === &#39;undefined&#39;) {
+        __message[type] = [fn];
+      } else {
+        __message[type].push(fn);
       }
-    })();
+      return this;
+    },
+    // 发布信息
+    fire: function(type, args){
+      if(!__message[type]) {
+        return this;
+      }
+      var event = {
+        type: type,
+        args: args || {}
+      },
+      i = 0,
+      len = __message[type].length;
+
+      for(; i &lt; len; i ++) {
+        __message[type][i].call(this, event);
+      }
+      return this;
+    },
+    // 移除信息
+    remove: function(type, fn){
+      if(__message[type] instanceof Array) {
+        var i = __message[type].length - 1;
+        for(; i&gt;= 0; i --) {
+          __message[type][i] === fn &amp;&amp; __message[type].splice(i, 1);
+        } 
+      }
+      return this;
+    }
+  }
+})();
 </code></pre>
 <p>简单说明下观察者对象，</p>
 <ul>
@@ -232,82 +232,82 @@
 <li><code>remove</code> function 的作用： 移除 <code>type</code> 消息中的 <code>fn</code> 的函数。</li>
 </ul>
 <p>ok！观察者对象也写好了，下面正式来实现CheckBox。</p>
-<pre><code class="javascript">    var index = 1;
-    //  首先我们先写构造函数
-    var CheckBox = function(options){
-      this.options = options;
-      // 为了方便选取，我们给每个cbox一个唯一的标示/顺便也写出其选择器
-      this.uniquecClass = &#39;gcb-&#39; + (index++) + &#39;-&#39; + new Date().getTime();
-      this.selector = &#39;.&#39; + this.uniquecClass;
-    }
-    //  ok,构造函数写完了，我们就要写他的原型了。
-    CheckBox.prototype = {
-      constructor: CheckBox, // 使得 instanceof 有效。
-      // 创建方法
-      create: function() {
-        var that = this,
-        // 为了方便， 我们采用字符串拼接的方式生成htmlStr。也省略一些必要的检验。
-        htmlStr = &#39;&lt;div class=&quot;gcb-wrap &#39; + that.uniquecClass + &#39;&quot; &gt;&#39;
-                + &#39;&lt;ul&gt;&#39;
-                + &#39;&lt;li data-val=&quot;&#39; + that.options.data.val + &#39;&quot; class=&quot;&#39; + (that.options.data.checked ? &#39;checked&#39; : &#39;&#39;) + &#39;&quot; &gt;&#39;
-                + &#39;&lt;i&gt;&lt;/i&gt;&#39; + that.options.data.text
-                + &#39;&lt;/li&gt;&#39;
-                + &#39;&lt;/ul&gt;&#39;
-                + &#39;&lt;/div&gt;&#39;;
+<pre><code class="javascript">var index = 1;
+//  首先我们先写构造函数
+var CheckBox = function(options){
+  this.options = options;
+  // 为了方便选取，我们给每个cbox一个唯一的标示/顺便也写出其选择器
+  this.uniquecClass = &#39;gcb-&#39; + (index++) + &#39;-&#39; + new Date().getTime();
+  this.selector = &#39;.&#39; + this.uniquecClass;
+}
+//  ok,构造函数写完了，我们就要写他的原型了。
+CheckBox.prototype = {
+  constructor: CheckBox, // 使得 instanceof 有效。
+  // 创建方法
+  create: function() {
+    var that = this,
+    // 为了方便， 我们采用字符串拼接的方式生成htmlStr。也省略一些必要的检验。
+    htmlStr = &#39;&lt;div class=&quot;gcb-wrap &#39; + that.uniquecClass + &#39;&quot; &gt;&#39;
+            + &#39;&lt;ul&gt;&#39;
+            + &#39;&lt;li data-val=&quot;&#39; + that.options.data.val + &#39;&quot; class=&quot;&#39; + (that.options.data.checked ? &#39;checked&#39; : &#39;&#39;) + &#39;&quot; &gt;&#39;
+            + &#39;&lt;i&gt;&lt;/i&gt;&#39; + that.options.data.text
+            + &#39;&lt;/li&gt;&#39;
+            + &#39;&lt;/ul&gt;&#39;
+            + &#39;&lt;/div&gt;&#39;;
 
-        that.options.container.html(htmlStr);
+    that.options.container.html(htmlStr);
 
-        // cbox点击事件。
-        $(that.selector).on(&#39;click&#39;, function(){
+    // cbox点击事件。
+    $(that.selector).on(&#39;click&#39;, function(){
 
-          var checked = !that.options.data.checked; // 与原先状态取反
+      var checked = !that.options.data.checked; // 与原先状态取反
 
-          that.check(checked);
+      that.check(checked);
 
-          that.options.clickCallback &amp;&amp; that.options.clickCallback(data, that.uniquecClass);
+      that.options.clickCallback &amp;&amp; that.options.clickCallback(data, that.uniquecClass);
 
-          return false;
+      return false;
 
-        });
+    });
 
-        return this;
-      },
-      // 获得cbox当前状态
-      isChecked: function(){
-        return !!this.options.data.checked;
-      },
-      // 更改cbox状态
-      check: function(checked){
+    return this;
+  },
+  // 获得cbox当前状态
+  isChecked: function(){
+    return !!this.options.data.checked;
+  },
+  // 更改cbox状态
+  check: function(checked){
 
-        var $li = $(this.selector).find(&#39;li&#39;);
+    var $li = $(this.selector).find(&#39;li&#39;);
 
-        this.options.data.checked = checked;
+    this.options.data.checked = checked;
 
-        checked ? $li.addClass(&#39;checked&#39;) : $li.removeClass(&#39;checked&#39;);
+    checked ? $li.addClass(&#39;checked&#39;) : $li.removeClass(&#39;checked&#39;);
 
-      }
-    }
+  }
+}
 </code></pre>
 <p>至此，一个简单的<code>cbox</code>也就完成了。<br>然而各个cbox之间相互没有任何关联，也没有任何的方式进行她们之间的通信。<br>所以，下面就需要清楚我们今天的主角 <code>Observer</code> 。我们要使用 <code>Observer</code> 来实现我们各个<code>cbox</code>之间的通信。</p>
-<pre><code class="javascript">    /**
-    *  首先我们需要在options中加入 parent 属性，其值为这个cbox的父cbox。就像我们第一段的代码。
-    *  这边我要稍微说一下，以下我提到的父box／子box可能不够准确，但是为了方便区分，姑且先使用这样的描述方式。 
-    *  因为我们加入了parent属性，所以我们在create的时候需要判断options中是否存在parent，如果没有则照常处理，如果有则做额外的处理。
-    */
-    create: function(){
-      // ... 省略已有代码
+<pre><code class="javascript">/**
+*  首先我们需要在options中加入 parent 属性，其值为这个cbox的父cbox。就像我们第一段的代码。
+*  这边我要稍微说一下，以下我提到的父box／子box可能不够准确，但是为了方便区分，姑且先使用这样的描述方式。 
+*  因为我们加入了parent属性，所以我们在create的时候需要判断options中是否存在parent，如果没有则照常处理，如果有则做额外的处理。
+*/
+create: function(){
+  // ... 省略已有代码
 
-      // 如下处理 parent;
-      if(that.options.parent) {
-        if(!(that.options.parent instanceof CheckBox)) {
-          throw new Error(&#39;Parent property isn\&#39;t CheckBox&#39;);
-        }
-        that.options.parent._child(that);
-        that._parent(that.options.parent);
-      } 
-
-      // ... 省略已有代码
+  // 如下处理 parent;
+  if(that.options.parent) {
+    if(!(that.options.parent instanceof CheckBox)) {
+      throw new Error(&#39;Parent property isn\&#39;t CheckBox&#39;);
     }
+    that.options.parent._child(that);
+    that._parent(that.options.parent);
+  } 
+
+  // ... 省略已有代码
+}
 </code></pre>
 <p>ok，这里就多了两个方法。<code>_child</code>,<code>_parent</code>，它们分别的作用为给cbox订阅子box和父box的点击消息。下面，我们来实现一下</p>
 <pre><code class="javascript">    CheckBox.prototype = {
@@ -349,85 +349,95 @@
 <p>上面的代码中抛出一个问题：父box如何根据其所有的子box的状态来调整自己的状态。<br>为了实现这个功能，我的想法是在类中定义两个变量</p>
 <ul>
 <li><code>_childNum</code> 代表此box子box的个数</li>
-<li><p><code>_checkedChildId</code> 代表此box已经被选中的子box的id。<br>ok，下面我们来改造之前的代码。<br>``` javascript<br>var CheckBox = function(options){</p>
-<p>  this._childNum = 0;<br>  this._checkedChildId = [];</p>
-<p>  // … 省略已有代码</p>
-<p>}</p>
-<p>CheckBox.prototype = {<br>  // … 省略已有代码</p>
-<p>  _child: function(cbox){</p>
-<pre><code>// ... 省略已有代码
-var that = this;
-that._childNum ++ ;
-
-// 为父box订阅子box的点击事件
-Observer.regist(&#39;child-&#39; + cbox.uniquecClass + &#39;-check&#39;, function(event){
-  // ... 省略已有代码
-
-  // 获得子box的id
-  var childId = event.type.split(&#39;-&#39;).slice(1).join(&#39;-&#39;);
-
-  // 判断check状态
-  if(event.args.checked) {
-    // 若子box为选中 则判断父box中是否已经存在此id，若已存在则不操作，若不存在push进父box的_checkedChild。
-    that._checkedChild.indexOf(childId) &gt; -1 ? &#39;&#39; : that._checkedChild.push(childId);
-  } else {
-    // 若子box为不选中 则判断父box中是否已经存在此id，若已存在则将其在_checkChild中剔除，若不存在则不操作。
-    that._checkedChild.indexOf(childId) &gt; -1 ? that._checkedChild.splice(that._checkedChild.indexOf(childId), 1) : &#39;&#39;;
-  }
-
-  // 判断子box是否全为被选中
-  var checked = (that._checkedChild.length == that._childNum);
-
-  that.check(checked);
-
-  // 修改此处的参数，为 checked
-  Observer.fire(&#39;child-&#39; + that.uniquecClass + &#39;-check&#39;, {checked: checked});
-});
-</code></pre><p>  },<br>  // 由于进行了改造，所以_parent 方法就需要做相应的修改<br>  _parent: function(cbox){</p>
-<pre><code>var that = this;
-
-Observer.regist(&#39;parent-&#39; cbox.uniquecClass + &#39;-check&#39;, function(event){
-  // ... 省略已有代码
-
-  var childId = that.uniquecClass + &#39;-check&#39;;
-
-  // 类似之前的判断。
-  if(event.args.checked) {
-    cbox._checkedChild.indexOf(childId) &gt; -1 ? &#39;&#39; : cbox._checkedChild.push(childId);
-  } else {
-    cbox._checkedChild.indexOf(childId) &gt; -1 ? cbox._checkedChild.splice(cbox._checkedChild.indexOf(childId), 1) : &#39;&#39;;
-  }
-
-  that.check(event.args.checked);
-
-  Observer.fire(&#39;parent-&#39; + that.uniquecClass + &#39;-check&#39;, {checked: event.args.checked});
-
-});
-</code></pre><p>  }<br>}</p>
-</li>
+<li><code>_checkedChildId</code> 代表此box已经被选中的子box的id。<br>ok，下面我们来改造之前的代码。</li>
 </ul>
-<pre><code>ok，写了这么久，相信大家都发现了，好像最初的点击事件中没有fire自身的点击事件消息。下面我们来加一下。
+<pre><code class="javascript">var CheckBox = function(options){
 
-``` javascript 
+  this._childNum = 0;
+  this._checkedChildId = [];
+
+  // ... 省略已有代码
+
+}
+
+CheckBox.prototype = {
+  // ... 省略已有代码
+
+  _child: function(cbox){
     // ... 省略已有代码
-    // cbox点击事件。
-    $(that.selector).on(&#39;click&#39;, function(){
+    var that = this;
+    that._childNum ++ ;
 
-      var checked = !that.options.data.checked; // 与原先状态取反
+    // 为父box订阅子box的点击事件
+    Observer.regist(&#39;child-&#39; + cbox.uniquecClass + &#39;-check&#39;, function(event){
+      // ... 省略已有代码
+
+      // 获得子box的id
+      var childId = event.type.split(&#39;-&#39;).slice(1).join(&#39;-&#39;);
+
+      // 判断check状态
+      if(event.args.checked) {
+        // 若子box为选中 则判断父box中是否已经存在此id，若已存在则不操作，若不存在push进父box的_checkedChild。
+        that._checkedChild.indexOf(childId) &gt; -1 ? &#39;&#39; : that._checkedChild.push(childId);
+      } else {
+        // 若子box为不选中 则判断父box中是否已经存在此id，若已存在则将其在_checkChild中剔除，若不存在则不操作。
+        that._checkedChild.indexOf(childId) &gt; -1 ? that._checkedChild.splice(that._checkedChild.indexOf(childId), 1) : &#39;&#39;;
+      }
+
+      // 判断子box是否全为被选中
+      var checked = (that._checkedChild.length == that._childNum);
 
       that.check(checked);
 
-      // 发布自身的点击事件消息。 parent／child 都发布。
-      Observer
-        .fire(&#39;child-&#39; + that.uniquecClass + &#39;-check&#39;, {checked: checked}) // 向父box发送点击事件消息
-        .fire(&#39;parent-&#39; + that.uniquecClass + &#39;-check&#39;, {checked: checked});  // 向子box发送点击事件消息
+      // 修改此处的参数，为 checked
+      Observer.fire(&#39;child-&#39; + that.uniquecClass + &#39;-check&#39;, {checked: checked});
+    });
+  },
+  // 由于进行了改造，所以_parent 方法就需要做相应的修改
+  _parent: function(cbox){
+    var that = this;
 
-      that.options.clickCallback &amp;&amp; that.options.clickCallback(data, that.uniquecClass);
+    Observer.regist(&#39;parent-&#39; cbox.uniquecClass + &#39;-check&#39;, function(event){
+      // ... 省略已有代码
 
-      return false;
+      var childId = that.uniquecClass + &#39;-check&#39;;
+
+      // 类似之前的判断。
+      if(event.args.checked) {
+        cbox._checkedChild.indexOf(childId) &gt; -1 ? &#39;&#39; : cbox._checkedChild.push(childId);
+      } else {
+        cbox._checkedChild.indexOf(childId) &gt; -1 ? cbox._checkedChild.splice(cbox._checkedChild.indexOf(childId), 1) : &#39;&#39;;
+      }
+
+      that.check(event.args.checked);
+
+      Observer.fire(&#39;parent-&#39; + that.uniquecClass + &#39;-check&#39;, {checked: event.args.checked});
 
     });
-</code></pre><p>至此，我们就基本上完成了CheckBox的开发，我们可以按照第一段代码的方式来生成cbox。<br>下面我会附上源码。当然这段代码中肯定是有不足的地方。我在写这篇博文的时候就发现了一个疏忽了地方。<br>不知道大家有没有发现？</p>
+  }
+}
+</code></pre>
+<p>ok，写了这么久，相信大家都发现了，好像最初的点击事件中没有fire自身的点击事件消息。下面我们来加一下。</p>
+<pre><code class="javascript">// ... 省略已有代码
+// cbox点击事件。
+$(that.selector).on(&#39;click&#39;, function(){
+
+  var checked = !that.options.data.checked; // 与原先状态取反
+
+  that.check(checked);
+
+  // 发布自身的点击事件消息。 parent／child 都发布。
+  Observer
+    .fire(&#39;child-&#39; + that.uniquecClass + &#39;-check&#39;, {checked: checked}) // 向父box发送点击事件消息
+    .fire(&#39;parent-&#39; + that.uniquecClass + &#39;-check&#39;, {checked: checked});  // 向子box发送点击事件消息
+
+  that.options.clickCallback &amp;&amp; that.options.clickCallback(data, that.uniquecClass);
+
+  return false;
+
+});
+</code></pre>
+<p>至此，我们就基本上完成了CheckBox的开发，我们可以按照第一段代码的方式来生成cbox。<br>下面我会附上源码。当然这段代码中肯定是有不足的地方。我在写这篇博文的时候就发现了一个疏忽了地方。<br>不知道大家有没有发现？</p>
 <p>（我没有去考虑如果生成的cbox已经存在被选中的状态 如何处理。）</p>
 
       
