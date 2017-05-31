@@ -159,8 +159,8 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet"></p>
-<script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>  
+        <p><link href="https://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet"></p>
+<script src="https://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>  
 <script>hljs.initHighlightingOnLoad();</script> 
 
 <p>最近读了《JavaScript设计模式》<em>张容铭版</em>，对JavaScript设计模式有了一定程度的了解。<br>在平时的工作中，我们经常会遇到一个多选框的需求，这样的需求会衍生出全选框的需求。由于项目中没有用到第三方框架所以就需要自己实现了。<br>按照普通的做法，我们都会先写一个CheckBox类，然后生成n个多选框，然后指定其中一个为全选框。在每个cbox的回调函数中写他们之间的逻辑处理。这样的做法，虽说灵活，每个cbox都是相对独立的，只有在回调函数中写他们之间的逻辑关系。但是这样也会带来一个问题。如果我们这个逻辑向外拓展，要指定出一个全选框控制其他的全选框，这样的一层接着一层的嵌套会使得逻辑变得十分复杂且难以看懂。（类似购物车，一个购物车中可能有多个店铺，一个店铺下可能有多个商品，购物车的全选框控制着店铺的全选框，店铺的全选框控制其下所有的多选框。）<br>由此，我衍生出将<code>CheckBox</code>类拓展的想法，在<code>new CheckBox()</code>的时候就传入其有可能存在的<code>parent</code>，像下面的写法一样。</p>
