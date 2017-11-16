@@ -6,14 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives | Hexo</title>
+  <title>在CentOS6.5系统安装Gitblit | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/archives/index.html">
+  <meta name="description" content="hljs.initHighlightingOnLoad();    最近买了一个阿里云服务器，自己就琢磨着用Gitblit自己搭建一个Git服务。现在搭成了，就随便写一下，记录一下过程。 环境准备  最最最最基础的条件当然有一个装有CentOS6.5系统的服务器啦，当然自己本地也可以用。  Gitblit运行环境是Java7+，所以我们需要在我们的服务器上安装好Java运行环境。  Ja">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在CentOS6.5系统安装Gitblit">
+<meta property="og:url" content="http://yoursite.com/2017/11/16/在CentOS6-5系统安装Gitblit/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="hljs.initHighlightingOnLoad();    最近买了一个阿里云服务器，自己就琢磨着用Gitblit自己搭建一个Git服务。现在搭成了，就随便写一下，记录一下过程。 环境准备  最最最最基础的条件当然有一个装有CentOS6.5系统的服务器啦，当然自己本地也可以用。  Gitblit运行环境是Java7+，所以我们需要在我们的服务器上安装好Java运行环境。  Ja">
+<meta property="og:image" content="http://yoursite.com/2017/11/public/img/WechatIMG9.jpeg">
+<meta property="og:updated_time" content="2017-11-16T06:08:04.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="在CentOS6.5系统安装Gitblit">
+<meta name="twitter:description" content="hljs.initHighlightingOnLoad();    最近买了一个阿里云服务器，自己就琢磨着用Gitblit自己搭建一个Git服务。现在搭成了，就随便写一下，记录一下过程。 环境准备  最最最最基础的条件当然有一个装有CentOS6.5系统的服务器啦，当然自己本地也可以用。  Gitblit运行环境是Java7+，所以我们需要在我们的服务器上安装好Java运行环境。  Ja">
+<meta name="twitter:image" content="http://yoursite.com/2017/11/public/img/WechatIMG9.jpeg">
   
     <link rel="alternative" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -137,103 +143,187 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-在CentOS6-5系统安装Gitblit" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      在CentOS6.5系统安装Gitblit
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/11/16/在CentOS6-5系统安装Gitblit/" class="archive-article-date">
+
+        
+        <a href="/2017/11/16/在CentOS6-5系统安装Gitblit/" class="archive-article-date">
   	<time datetime="2017-11-16T02:58:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-11-16</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/11/16/在CentOS6-5系统安装Gitblit/">在CentOS6.5系统安装Gitblit</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><link href="https://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet"></p>
+<script src="https://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>  
+<script>hljs.initHighlightingOnLoad();</script> 
 
-        <div class="article-info info-on-right">
-          
-          
 
+<p>最近买了一个阿里云服务器，自己就琢磨着用<a href="https://github.com/gitblit/gitblit" target="_blank" rel="external">Gitblit</a>自己搭建一个Git服务。现在搭成了，就随便写一下，记录一下过程。</p>
+<h4 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h4><blockquote>
+<p> 最最最最基础的条件当然有一个装有CentOS6.5系统的服务器啦，当然自己本地也可以用。</p>
+<p> Gitblit运行环境是Java7+，所以我们需要在我们的服务器上安装好Java运行环境。</p>
+</blockquote>
+<h4 id="Java环境安装"><a href="#Java环境安装" class="headerlink" title="Java环境安装"></a>Java环境安装</h4><p>因为是第一次装，所以我的服务器上没有Java运行环境，这里也说明一下步骤好了。</p>
+<ol>
+<li><p>下载安装包。我们去<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" target="_blank" rel="external">甲骨文官网</a>选择与服务器版本符合的jdk版本。（注意要选择与系统位数相同的版本。32位选x86／64位选x64）。这是我选择的版本<img src="../../public/img/WechatIMG9.jpeg" alt="">另外，如果是本地下载需要上传到服务器上，我们也可以直接在服务器上使用<code>wget [url]</code>命令直接下载（url为下载地址。）</p>
+</li>
+<li><p>解压压缩包。下面我们下载的是压缩包。</p>
+<blockquote>
+<p>首先我们现在<code>/usr</code>目录下创建<code>java</code>目录，<code>mkdir /usr/java</code><br>然后将压缩包移到该目录下<br>接着我们到该目录下<code>cd /usr/java</code>;执行<code>tar -zxvf jdk-8u151-linux-x64.tar.gz</code></p>
+</blockquote>
+</li>
+<li><p>下面我们开始配置环境变量。 </p>
+<p><code>vim /etc/profile</code> 在文本最后加入</p>
+<p>JAVA_HOME=/usr/Java/jdk1.8.0_151</p>
+<p>JRE_HOME=/usr/Java/jdk1.8.0_151/jre</p>
+<p>CLASS_PATH=.:$JAVA_HOME/bin/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib</p>
+<p>PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin</p>
+<p>export JAVA_HOME JRE_HOME CLASS_PATH PATH</p>
+<p>最后执行 <code>source /etc/profile</code> 使环境变量配置生效</p>
+</li>
+<li><p>执行<code>java -version</code>验证是否安装成功。</p>
+</li>
+</ol>
+<h4 id="安装Gitblit"><a href="#安装Gitblit" class="headerlink" title="安装Gitblit"></a>安装Gitblit</h4><ol>
+<li><p>下载安装包。 <a href="http://gitblit.com/" target="_blank" rel="external">Gitblit官网</a>。当然我们也可以直接使用<code>wget http://dl.bintray.com/gitblit/releases/gitblit-1.8.0.tar.gz</code> 在服务器上下载。我们将安装包下载到<code>/opt</code>目录下。</p>
+</li>
+<li><p>解压安装包。<code>cd /opt</code> 转至该目录下。执行<code>tar -xzvf gitblit-1.8.0.tar.gz</code></p>
+</li>
+<li><p>修改一些配置信息。 修改文件<code>/opt/gitblit-1.8.0/data/defaults.properties</code>.</p>
+<p>server.httpPort=60 (端口号可以自己选择);<br>server.httpBindInterface= (可以不用填，还是可以用的。)<br>server.httpsBindInterface=localhost</p>
+<p>修改完之后保存退出。</p>
+<p>继续修改文件<code>/opt/gitblit-1.8.0/service-centos.sh</code></p>
+<p>GITBLIT_PATH=/opt/gitblit-1.8.0<br>GITBLIT_BASE_FOLDER=/opt/gitblit-1.8.0/data<br>GITBLIT_HTTP_PORT=60<br>GITBLIT_HTTPS_PORT=8443</p>
+<p>修改这些文件跟第一个文件对应的地方一致。</p>
+</li>
+<li><p>启动服务。 </p>
+<p><code>java -jar gitblit.jar --baseFolder data</code></p>
+<p>就可以了。</p>
+<p>可以通过 <a href="http://你的域名:端口号" target="_blank" rel="external">http://你的域名:端口号</a> 访问了。</p>
+</li>
+</ol>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2017/11/16/在CentOS6-5系统安装Gitblit/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/09/关于RxJS最最最基本的使用/" class="archive-article-date">
-  	<time datetime="2017-09-09T05:57:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-09</time>
-</a>
-        </div>
-    	 
+<nav id="article-nav">
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/09/关于RxJS最最最基本的使用/">关于RxJS最最最基本的使用</a>
-    </h1>
+  
+    <a href="/2017/09/09/关于RxJS最最最基本的使用/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">关于RxJS最最最基本的使用</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+
+  
+  
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/05/26/观察者模式于CheckBox组件的实践/" class="archive-article-date">
-  	<time datetime="2017-05-26T14:12:34.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-26</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/05/26/观察者模式于CheckBox组件的实践/">观察者模式于CheckBox组件的实践</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -256,8 +346,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
